@@ -359,6 +359,7 @@ smokeping/
 ```
 
 ## 🛠️ Solución de Problemas
+### Error: No such file or directory para archivos .rrd**Síntoma:** Ves errores como `ERROR: opening '/data/CDN/CloudFlare.rrd': No such file or directory`**Causa:** Es **normal y esperado** cuando SmokePing se ejecuta por primera vez. Los archivos RRD (Round Robin Database) se generan automáticamente cuando SmokePing empieza a monitorear los targets.**Solución:**- **Espera 5-10 minutos** después de iniciar el contenedor- SmokePing ejecutará su primer ciclo de monitoreo y creará los archivos RRD automáticamente- El error desaparecerá una vez que se generen los primeros datos**Nota:** Los archivos RRD contienen datos históricos y pueden ser muy grandes, por lo que no se incluyen en el repositorio Git. Cada instalación comienza con datos vacíos y los genera automáticamente.
 
 ### El logo no se muestra
 
