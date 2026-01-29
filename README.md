@@ -39,12 +39,23 @@ nano .env
 ```
 
 3. **Iniciar el servicio:**
-```bash
-docker-compose up -d
-```
+
+   **Opción A: Con Nginx (desarrollo/local)**
+   ```bash
+   docker-compose up -d
+   # o
+   docker-compose -f docker-compose.nginx.yml up -d
+   ```
+
+   **Opción B: Con Traefik + Swarm (producción)**
+   ```bash
+   # Edita las variables en docker-compose.swarm.yml o usa .env
+   docker stack deploy -c docker-compose.swarm.yml smokeping
+   ```
 
 4. **Acceder a la interfaz:**
-Abre tu navegador en: `http://localhost:8080/smokeping/`
+   - Con Nginx: `http://localhost:8080/smokeping/`
+   - Con Traefik: `https://tu-dominio.com/smokeping/`
 
 ¡Listo! 🎉
 
