@@ -9,7 +9,8 @@ Docker image de **SmokePing** con frontend personalizado y funcionalidad de trac
 
 - ✅ **SmokePing 2.9.0** - Última versión estable
 - ✅ **Frontend moderno** - Interfaz personalizada y responsive
-- ✅ **Traceroute integrado** - Funcionalidad de traceroute con historial
+- ✅ **Traceroute integrado** - Panel de traceroute en vivo en Navigator y vista de targets
+- ✅ **Historial de traceroute** - Almacenamiento SQLite con búsqueda por fecha/hora
 - ✅ **Logo configurable** - Personaliza tu logo fácilmente
 - ✅ **Hostname configurable** - Personaliza el nombre en los gráficos
 - ✅ **Fácil instalación** - Un solo comando con docker-compose
@@ -341,21 +342,29 @@ docker-compose exec smokeping sh
 
 ```
 smokeping/
-├── docker-compose.yml    # Configuración de Docker Compose
-├── .env.example         # Ejemplo de variables de entorno
-├── .env                 # Tus variables personalizadas (no se sube a git)
-├── README.md            # Este archivo
-├── LICENSE              # Licencia GPL v3
-├── config/              # Configuración de SmokePing
-│   ├── Targets          # Targets a monitorear
-│   ├── Probes           # Configuración de probes
-│   └── ...
-├── frontend/            # Frontend personalizado
-│   ├── basepage.html    # Template HTML principal
-│   ├── css/             # Estilos CSS
-│   ├── js/              # JavaScript
-│   └── images/          # Imágenes y logos
-└── scripts/             # Scripts de inicialización
+├── docker-compose.yml       # Configuración de Docker Compose
+├── Dockerfile               # Imagen Docker personalizada
+├── .env.example             # Ejemplo de variables de entorno
+├── .env                     # Tus variables personalizadas (no se sube a git)
+├── README.md                # Este archivo
+├── LICENSE                  # Licencia GPL v3
+├── config/                  # Configuración de SmokePing
+│   ├── Targets              # Targets a monitorear
+│   ├── Probes               # Configuración de probes
+│   └── ...                  # Otros archivos de config
+├── frontend/                # Frontend personalizado
+│   ├── basepage.html        # Template HTML principal
+│   ├── css/                 # Estilos CSS
+│   ├── js/                  # JavaScript (smokeping.js, traceping.js)
+│   └── images/              # Imágenes y logos
+├── nginx/                   # Configuración de Nginx proxy
+│   └── smokeping.conf       # Server block config
+├── scripts/                 # Scripts de inicialización
+│   └── init.d/              # Scripts que se ejecutan al inicio
+├── traceping.cgi            # Wrapper CGI shell
+├── traceping.cgi.pl         # Script CGI Perl para traceroute
+├── traceping_daemon.pl      # Daemon de generación de traceroutes
+└── traceping_server_simple.pl  # Servidor HTTP para CGI (puerto 9000)
 ```
 
 ## 🛠️ Solución de Problemas

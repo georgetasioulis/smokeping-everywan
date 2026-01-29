@@ -7,7 +7,7 @@ use POSIX qw(strftime);
 
 # Configuración - Adaptada para Docker
 my $dsn = "dbi:SQLite:dbname=/data/traceping.sqlite";
-my $config_file = '/config/config';
+my $config_file = '/config/Targets';
 my $interval = $ENV{TRACEPING_INTERVAL} || 300;  # 5 minutos por defecto
 my $retention_days = $ENV{TRACEPING_RETENTION_DAYS} || 365;  # 1 año por defecto
 
