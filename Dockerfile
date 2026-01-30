@@ -21,6 +21,11 @@ COPY src/traceping.cgi /usr/share/webapps/smokeping/traceping.cgi
 COPY src/traceping.cgi.pl /usr/share/webapps/smokeping/traceping.cgi.pl
 COPY src/traceping_daemon.pl /opt/smokeping/traceping_daemon.pl
 COPY src/traceping_server_simple.pl /opt/smokeping/traceping_server_simple.pl
+COPY src/telegram_notify.pl /usr/share/webapps/smokeping/telegram_notify.pl
+
+# Ensure permissions and install missing dependencies if any (DBI is usually there but let's be safe)
+RUN chmod +x /usr/share/webapps/smokeping/telegram_notify.pl && \
+    apk add --no-cache perl-dbi perl-dbd-sqlite perl-lwp-protocol-https perl-http-tiny
 COPY frontend/ /usr/share/webapps/smokeping/
 COPY frontend/basepage.html /etc/smokeping/basepage.html
 COPY config/Targets /defaults/Targets

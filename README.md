@@ -51,12 +51,32 @@ docker stack deploy -c docker-compose.full-stack.yml monitor
 ```
 *(Access Smokeping via http://localhost or any node IP)*
 
+## 🔔 Telegram Alerts
+
+Smokeping can now send alerts directly to Telegram when:
+1.  Packet Loss is detected.
+2.  Latency spikes occur.
+3.  **Route Changes**: If the traceroute path changes, you get a notification with the old and new route.
+
+### Configuration
+Simply add these environment variables to your compose file:
+
+```yaml
+    environment:
+      - TELEGRAM_BOT_TOKEN=123456789:AbCdeWgHiJkLmNoPqRsTuVwXyZ
+      - TELEGRAM_CHAT_ID=-100123456789
+```
+
+The system works automatically once these variables are present.
+
 ## ⚙️ Configuration (Environment Variables)
 
 You can customize everything directly in the compose file or `.env`:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
+| `TELEGRAM_BOT_TOKEN` | Bot Token from @BotFather | `12345...` |
+| `TELEGRAM_CHAT_ID` | Chat/Channel ID | `-100...` |
 | `SMOKEPING_LOGO_URL` | Logo URL (remote or local) | `https://example.com/logo.svg` |
 | `SMOKEPING_COLOR_SIDEBAR_BG` | Sidebar background color | `#233350` |
 | `SMOKEPING_BRAND_NAME` | Brand name in footer | `My Company` |

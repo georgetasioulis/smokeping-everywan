@@ -155,16 +155,50 @@ sub run_traceroute {
     my $name = $target->{target};
     
     # Ejecutar traceroute
-    my $result = `/usr/bin/traceroute -w 1 -q 3 -m 30 $host 2>&1`;
+    my $result = `/usr/bin/traceroute -w 1 -q 1 -m 20 $host 2>&1`; # Optimizado: 1 sonda, max 20 saltos para velocidad
+    my $timestamp = strftime("%Y-%m-%d %H:%M:%S", localtime);
     
-    # Guardar en DB con hora local
     my $dbh = DBI->connect($dsn, '', '', { RaiseError => 0, PrintError => 0 });
     if ($dbh) {
-        my $timestamp = strftime("%Y-%m-%d %H:%M:%S", localtime);
+        # 1. Recuperar el último traceroute
+        my $last_tracert = "";
+        my $sth_check = $dbh->prepare('SELECT tracert FROM traceroute_history WHERE target = ? ORDER BY timestamp DESC LIMIT 1');
+        $sth_check->execute($name);
+        if (my $row = $sth_check->fetchrow_hashref) {
+            $last_tracert = $row->{tracert};
+        }
+        
+        # 2. Insertar el nuevo
         my $sth = $dbh->prepare('INSERT INTO traceroute_history (target, tracert, timestamp) VALUES (?, ?, ?)');
         $sth->execute($name, $result, $timestamp);
+        
+        # 3. Detectar cambios (Si hay config de telegram y habia ruta previa)
+        if ($ENV{'TELEGRAM_BOT_TOKEN'} && $last_tracert && $last_tracert ne $result) {
+            # Limpiar timestamps/tiempos del output para evitar falsos positivos por jitter
+            # Comparamos solo las IPs/Hosts
+            my $clean_old = extract_hops($last_tracert);
+            my $clean_new = extract_hops($result);
+            
+            if ($clean_old ne $clean_new) {
+                print "Route change detected for $name\n";
+                system("/usr/share/webapps/smokeping/telegram_notify.pl", "Route Change Detected", $name, "", "", $host, "Old Route: $clean_old\nNew Route: $clean_new");
+            }
+        }
+        
         $dbh->disconnect;
     }
+}
+
+# Helper para extraer solo los saltos (IPs) y ignorar tiempos
+sub extract_hops {
+    my $trace = shift;
+    my @hops;
+    foreach my $line (split /\n/, $trace) {
+        if ($line =~ /^\s*(\d+)\s+(.+?)\s+\d+\.\d+ ms/) {
+            push @hops, "$1: $2";
+        }
+    }
+    return join(",", @hops);
 }
 
 sub cleanup_old_records {

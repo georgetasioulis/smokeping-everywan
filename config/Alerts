@@ -1,10 +1,23 @@
 *** Alerts ***
-to = alertee@address.somewhere
-from = smokealert@company.xy
+to = |/usr/share/webapps/smokeping/telegram_notify.pl
+from = smokealert@localhost
+
++bigloss
+type = loss
+pattern = ==0%,==0%,==0%,==0%,>0%,>0%,>0%
+comment = sudden loss detected
 
 +someloss
 type = loss
-# in percent
 pattern = >0%,*12*,>0%,*12*,>0%
 comment = loss 3 times  in a row
 
++startloss
+type = loss
+pattern = ==S,>0%,>0%,>0%
+comment = loss at startup
+
++rttdetect
+type = rtt
+pattern = <10,<10,<10,<10,<10,<100,>100,>100,>100
+comment = sudden rtt increase
