@@ -25,6 +25,22 @@ We've been using this in production for years. Now we're sharing it.
 
 ---
 
+## Screenshots
+
+**Dashboard with multi-location monitoring**
+
+![Dashboard](https://files.catbox.moe/r7ssle.png)
+
+**Target detail with integrated traceroute panel**
+
+![Traceroute Panel](https://files.catbox.moe/mamr5u.png)
+
+**Navigator graph for historical analysis**
+
+![Navigator](https://files.catbox.moe/uf1swj.png)
+
+---
+
 ## What you get
 
 **Modern Web Interface**
