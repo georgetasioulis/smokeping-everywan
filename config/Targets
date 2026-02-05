@@ -128,6 +128,11 @@ menu = EMEA
 title = Europe, Middle East & Africa
 alerts = bigloss,someloss,rttdetect,startloss
 
+++everyWAN_AS33932
+menu = ES everyWAN (Barcelona) AS33932
+title = ES everyWAN (Barcelona) AS33932
+host = everywan.com
+
 # --- Spain ---
 
 ++ES_Orange_BCN_AS12479
