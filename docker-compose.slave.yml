@@ -1,0 +1,92 @@
+# ==============================================================================
+# SmokePing SLAVE Docker Compose Configuration
+# ==============================================================================
+# Use this file to deploy a SmokePing slave that reports to a central Master.
+#
+# The slave will:
+#   - Execute ping probes locally and send results to the Master
+#   - Run its own traceroute daemon with local history
+#   - Optionally serve a local web interface
+#
+# SETUP:
+#   1. Configure the Master first (see main docker-compose.yml)
+#   2. Add this slave to the Master's config/Slaves file
+#   3. Add the shared secret to config/smokeping_secrets on the Master
+#   4. Update MASTER_URL and SHARED_SECRET below
+#   5. Run: docker-compose -f docker-compose.slave.yml up -d
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  smokeping:
+    image: sistemasminorisa/smokeping:2.9.0
+    container_name: smokeping-slave
+    hostname: ${SLAVE_HOSTNAME:-smokeping-slave}
+    
+    environment:
+      # --- System Configuration ---
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Europe/Madrid}
+      
+      # --- SLAVE MODE CONFIGURATION (REQUIRED) ---
+      # These 3 variables activate slave mode
+      - MASTER_URL=${MASTER_URL:-https://master.example.com/smokeping/smokeping.cgi}  # URL to Master's CGI
+      - SHARED_SECRET=${SHARED_SECRET:-change_me_secret}  # Must match Master's smokeping_secrets
+      - CACHE_DIR=/var/lib/smokeping  # Local cache for probe data
+      
+      # --- Alerts (Telegram) ---
+      # Slaves can send their own alerts independently
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      
+      # --- Site Identity ---
+      - SMOKEPING_OWNER=${SMOKEPING_OWNER:-Slave Admin}
+      - SMOKEPING_HOSTNAME=${SLAVE_HOSTNAME:-smokeping-slave}
+      - SMOKEPING_TITLE=${SMOKEPING_TITLE:-Network Monitor (Slave)}
+      
+      # --- Branding ---
+      - SMOKEPING_BRAND_NAME=${SMOKEPING_BRAND_NAME:-My Company}
+      - SMOKEPING_BRAND_URL=${SMOKEPING_BRAND_URL:-https://example.com}
+      - SMOKEPING_LOGO_URL=${SMOKEPING_LOGO_URL:-https://example.com/logo.png}
+      - SMOKEPING_COLOR_SIDEBAR_BG=${SMOKEPING_COLOR_SIDEBAR_BG:-#1a1a2e}
+      
+      # --- Traceroute Configuration ---
+      # Traceroute runs locally on each slave with its own history
+      - TRACEPING_INTERVAL=${TRACEPING_INTERVAL:-300}
+      - TRACEPING_RETENTION_DAYS=${TRACEPING_RETENTION_DAYS:-365}
+      
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+      
+    # Port 80 is optional for slaves - only needed if you want local web access
+    ports:
+      - "80:80"
+      
+    volumes:
+      # Data volume for local traceroute history (traceping.sqlite)
+      - ./data:/data
+      # Config is optional for slaves (they get config from Master)
+      # Uncomment if you want to override local settings
+      # - ./config:/config
+      
+    restart: unless-stopped
+
+# ==============================================================================
+# USAGE EXAMPLE:
+# ==============================================================================
+#
+# 1. Create .env file with your settings:
+#    MASTER_URL=https://lg.example.com/smokeping/smokeping.cgi
+#    SHARED_SECRET=your_secret_key_here
+#    SLAVE_HOSTNAME=nyc-slave
+#    TZ=America/New_York
+#
+# 2. Start the slave:
+#    docker-compose -f docker-compose.slave.yml up -d
+#
+# 3. Verify connection in Master's logs:
+#    You should see the slave registering and sending probe data.
+# ==============================================================================

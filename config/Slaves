@@ -1,10 +1,53 @@
+# ==============================================================================
+# SmokePing Slaves Configuration
+# ==============================================================================
+# This file configures remote SmokePing instances that report to this Master.
+# Each slave runs its own probes and sends results back to the master.
+#
+# REQUIREMENTS:
+# 1. Uncomment the "*** Slaves ***" section below
+# 2. Define each slave with a unique name matching the slave's hostname
+# 3. Add shared secrets to /config/smokeping_secrets (format: hostname:secret)
+# 4. On the slave, set environment variables:
+#    - MASTER_URL=https://this-master.com/smokeping/smokeping.cgi
+#    - SHARED_SECRET=the_secret_key
+#    - CACHE_DIR=/var/lib/smokeping
+#
+# For more info, see: https://oss.oetiker.ch/smokeping/doc/smokeping_master_slave.en.html
+# ==============================================================================
+
 *** Slaves ***
-secrets=/etc/smokeping/smokeping_secrets
-#+boomer
-#display_name=boomer
-#color=0000ff
+secrets=/config/smokeping_secrets
 
-#+slave2
-#display_name=another
-#color=00ff00
+# ------------------------------------------------------------------------------
+# Example Slave Definitions (uncomment and modify as needed)
+# ------------------------------------------------------------------------------
 
+# +nyc-slave
+# display_name = New York Data Center
+# location = New York, USA
+# color = 00ff00
+
+# +london-slave
+# display_name = London Office
+# location = London, UK
+# color = 0000ff
+
+# +tokyo-slave
+# display_name = Tokyo POP
+# location = Tokyo, Japan
+# color = ff6600
+
+# ------------------------------------------------------------------------------
+# Assigning Slaves to Targets
+# ------------------------------------------------------------------------------
+# In your config/Targets file, you can specify which slaves monitor each target:
+#
+# +WebServers
+# menu = Web Servers
+# title = Production Web Servers
+# slaves = nyc-slave london-slave    # ← Both slaves will monitor this group
+#
+# ++MainWebsite
+# host = www.example.com
+# slaves = nyc-slave                 # ← Only NYC slave monitors this target

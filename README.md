@@ -210,6 +210,96 @@ You can customize everything directly in the compose file or `.env`:
 | `PUID` / `PGID` | User/Group ID | `1000` |
 | `TZ` | Timezone | `Europe/London` |
 
+## 🌍 Multi-Location Monitoring (Master/Slave)
+
+This image supports **distributed monitoring** using SmokePing's native Master/Slave architecture. Deploy multiple instances across different locations to monitor network paths from various perspectives.
+
+### How It Works
+
+```
+┌─────────────────────────────────┐
+│  MASTER (Headquarters)          │
+│  ├─ Collects data from Slaves   │
+│  ├─ Stores all RRD graphs       │
+│  ├─ Runs its own traceroute     │
+│  └─ Central web interface       │
+└───────────────▲─────────────────┘
+                │ HTTP (results push)
+    ┌───────────┴───────────┐
+    │                       │
+┌───┴───────────┐   ┌───────┴───────┐
+│ SLAVE (NYC)   │   │ SLAVE (Tokyo) │
+│ ├─ Pings      │   │ ├─ Pings      │
+│ ├─ Traceroute │   │ ├─ Traceroute │
+│ └─ Local hist │   │ └─ Local hist │
+└───────────────┘   └───────────────┘
+```
+
+### Slave Mode Variables
+
+To run an instance as a **Slave**, add these environment variables:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `MASTER_URL` | Full URL to master's CGI | ✅ Yes |
+| `SHARED_SECRET` | Authentication key (must match master) | ✅ Yes |
+| `CACHE_DIR` | Local cache directory | ✅ Yes |
+
+### Example: Slave Configuration
+
+```yaml
+# docker-compose.slave.yml
+services:
+  smokeping:
+    image: sistemasminorisa/smokeping:latest
+    environment:
+      - TZ=America/New_York
+      - MASTER_URL=https://master.example.com/smokeping/smokeping.cgi
+      - SHARED_SECRET=MySecretKey123
+      - CACHE_DIR=/var/lib/smokeping
+      # Traceroute still runs locally on the slave
+      - TRACEPING_INTERVAL=300
+    volumes:
+      - ./data:/data    # Local traceroute history
+    ports:
+      - "80:80"         # Optional: local web access
+```
+
+### Master Configuration
+
+On the **Master**, configure `config/Slaves` to register your slaves:
+
+```ini
+*** Slaves ***
+secrets=/config/smokeping_secrets
+
++nyc-slave
+display_name = New York
+color = 00ff00
+
++tokyo-slave  
+display_name = Tokyo
+color = 0000ff
+```
+
+And add the shared secret to `config/smokeping_secrets`:
+```
+nyc-slave:MySecretKey123
+tokyo-slave:AnotherSecretKey456
+```
+
+### What Each Instance Gets
+
+| Feature | Master | Slave |
+|---------|--------|-------|
+| Latency Graphs (3h, 10d, 360d) | ✅ All locations | Sent to Master |
+| Traceroute Daemon | ✅ Runs locally | ✅ Runs locally |
+| Traceroute History | ✅ Local DB | ✅ Local DB |
+| Telegram Alerts | ✅ Works | ✅ Works |
+| Web Interface | ✅ Full | ✅ Local only |
+
+> **Note:** Each instance (Master or Slave) maintains its **own traceroute history** in a local SQLite database. This means you can see the network path from each location's perspective.
+
 ## 📦 Docker Hub
 
 The image is available on Docker Hub:
